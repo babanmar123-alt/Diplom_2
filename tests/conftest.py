@@ -1,25 +1,23 @@
 import pytest
 import requests
 
-from helpers.api_client import ApiClient
 from helpers.data_generator import generate_user_data
-from helpers.urls import REGISTER, LOGIN, USER
-
-
-@pytest.fixture
-def api_client():
-    """Возвращает экземпляр ApiClient."""
-    return ApiClient()
+from helpers.urls import REGISTER, USER
 
 
 @pytest.fixture
 def unique_user():
-    """Создаёт уникального пользователя и удаляет его после теста."""
+    """Создаёт уникального пользователя и удаляет его после теста.
+
+    ВАЖНО: без ассертов — только подготовка и очистка данных.
+    """
     user_data = generate_user_data()
 
-    # Создаём пользователя
     response = requests.post(REGISTER, json=user_data)
-    assert response.status_code == 200, f"Не удалось создать пользователя: {response.text}"
+
+    if response.status_code != 200:
+        yield {"user_data": user_data, "token": None}
+        return
 
     token = response.json().get("accessToken")
 
@@ -29,7 +27,6 @@ def unique_user():
         "response": response
     }
 
-    # Удаляем пользователя после теста
     if token:
         requests.delete(USER, headers={"Authorization": token})
 

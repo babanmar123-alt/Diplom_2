@@ -22,3 +22,16 @@
 
 ## Структура проекта
 
+Diplom_2/
+├── helpers/
+│ ├── api_client.py
+│ ├── data_generator.py
+│ └── urls.py
+├── tests/
+│ ├── conftest.py
+│ ├── test_create_user.py
+│ ├── test_login_user.py
+│ └── test_create_order.py
+├── requirements.txt
+├── pytest.ini
+└── README.md

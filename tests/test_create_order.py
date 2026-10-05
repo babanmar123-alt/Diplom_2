@@ -1,23 +1,16 @@
 import pytest
 import requests
 
-from helpers.urls import ORDERS, INGREDIENTS
+from helpers.order_helpers import get_valid_ingredients
+from helpers.urls import ORDERS
 
 
 class TestCreateOrder:
     """Тесты создания заказа."""
 
-    @staticmethod
-    def get_valid_ingredients():
-        """Получает валидные ID ингредиентов."""
-        response = requests.get(INGREDIENTS)
-        assert response.status_code == 200
-        data = response.json()["data"]
-        return [data[0]["_id"], data[1]["_id"]]
-
     def test_create_order_with_auth(self, registered_user_token):
         """Создание заказа с авторизацией — 200 OK."""
-        ingredients = self.get_valid_ingredients()
+        ingredients = get_valid_ingredients()
         response = requests.post(
             ORDERS,
             json={"ingredients": ingredients},
@@ -33,7 +26,7 @@ class TestCreateOrder:
     @pytest.mark.xfail(reason="Баг API: сервер принимает заказ без авторизации, должен возвращать 401")
     def test_create_order_without_auth(self):
         """Создание заказа без авторизации — 401 Unauthorized."""
-        ingredients = self.get_valid_ingredients()
+        ingredients = get_valid_ingredients()
         response = requests.post(ORDERS, json={"ingredients": ingredients})
 
         assert response.status_code == 401
@@ -43,7 +36,7 @@ class TestCreateOrder:
 
     def test_create_order_with_ingredients(self, registered_user_token):
         """Создание заказа с ингредиентами — 200 OK."""
-        ingredients = self.get_valid_ingredients()
+        ingredients = get_valid_ingredients()
         response = requests.post(
             ORDERS,
             json={"ingredients": ingredients},

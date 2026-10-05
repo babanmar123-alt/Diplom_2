@@ -1,7 +1,7 @@
 import requests
 
 from helpers.data_generator import generate_user_data
-from helpers.urls import REGISTER
+from helpers.urls import REGISTER, USER
 
 
 class TestCreateUser:
@@ -20,12 +20,9 @@ class TestCreateUser:
         assert body["user"]["email"] == user_data["email"]
         assert body["user"]["name"] == user_data["name"]
 
-        # Удаляем созданного пользователя
+        # Очистка
         token = body["accessToken"]
-        requests.delete(
-            "https://stellarburgers.education-services.ru/api/auth/user",
-            headers={"Authorization": token}
-        )
+        requests.delete(USER, headers={"Authorization": token})
 
     def test_create_duplicate_user(self, unique_user):
         """Создание дубликата пользователя — 403 Forbidden."""
@@ -43,7 +40,7 @@ class TestCreateUser:
         del user_data["email"]
         response = requests.post(REGISTER, json=user_data)
 
-        assert response.status_code == 403, f"Ожидался 403, получен {response.status_code}"
+        assert response.status_code == 403
         body = response.json()
         assert body["success"] is False
         assert body["message"] == "Email, password and name are required fields"
@@ -55,6 +52,9 @@ class TestCreateUser:
         response = requests.post(REGISTER, json=user_data)
 
         assert response.status_code == 403
+        body = response.json()
+        assert body["success"] is False
+        assert body["message"] == "Email, password and name are required fields"
 
     def test_create_user_without_name(self):
         """Создание пользователя без name — 403 Forbidden."""
@@ -63,3 +63,6 @@ class TestCreateUser:
         response = requests.post(REGISTER, json=user_data)
 
         assert response.status_code == 403
+        body = response.json()
+        assert body["success"] is False
+        assert body["message"] == "Email, password and name are required fields"

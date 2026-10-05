@@ -1,13 +1,10 @@
 import requests
+
 from helpers.urls import REGISTER, LOGIN, USER, ORDERS, INGREDIENTS
 
 
 class ApiClient:
     """Обёртка над requests для работы с API Stellar Burgers."""
-
-    def __init__(self):
-        self.base_url = "https://stellarburgers.education-services.ru/api"
-        self.token = None
 
     def register(self, email: str, password: str, name: str) -> requests.Response:
         """Регистрация пользователя."""
@@ -38,7 +35,3 @@ class ApiClient:
     def get_ingredients(self) -> requests.Response:
         """Получение списка ингредиентов."""
         return requests.get(INGREDIENTS)
-
-    def get_orders(self, token: str) -> requests.Response:
-        """Получение заказов пользователя."""
-        return requests.get(ORDERS, headers={"Authorization": token})
