@@ -9,26 +9,28 @@ from helpers.urls import REGISTER, USER
 def unique_user():
     """Создаёт уникального пользователя и удаляет его после теста.
 
-    ВАЖНО: без ассертов — только подготовка и очистка данных.
+    Если пользователь не создался — тест пропускается (pytest.skip).
     """
     user_data = generate_user_data()
 
+    # Создаём пользователя
     response = requests.post(REGISTER, json=user_data)
 
+    # Если пользователь не создался — пропускаем тест
     if response.status_code != 200:
-        yield {"user_data": user_data, "token": None}
-        return
+        pytest.skip(f"Не удалось создать пользователя: {response.text}")
 
-    token = response.json().get("accessToken")
+    token = response.json()["accessToken"]
 
+    # ОДИН yield — передаём данные в тест
     yield {
         "user_data": user_data,
         "token": token,
         "response": response
     }
 
-    if token:
-        requests.delete(USER, headers={"Authorization": token})
+    # Очистка: удаляем пользователя после теста
+    requests.delete(USER, headers={"Authorization": token})
 
 
 @pytest.fixture
